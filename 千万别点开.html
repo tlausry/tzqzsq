@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>满屏动态爱心</title>
+    <style>
+        /* 防止页面出现滚动条 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+        /* 使canvas填充满整个屏幕 */
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+
+    <script>
+        // 获取canvas元素并设置上下文
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 获取画布尺寸并设置
+        let width, height;
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();  // 初始化画布大小
+
+        // 绘制心形的函数
+        function drawHeart(x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.bezierCurveTo(x, y - size / 2, x - size / 2, y - size, x - size, y);
+            ctx.bezierCurveTo(x - size, y + size, x, y + size * 1.5, x, y + size);
+            ctx.bezierCurveTo(x + size, y + size * 1.5, x + size, y + size, x + size, y);
+            ctx.bezierCurveTo(x + size / 2, y - size, x, y - size / 2, x, y);
+            ctx.fillStyle = "red";  // 红色心形
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // 创建多个动态心形
+        let hearts = [];
+
+        // 定义心形类
+        class Heart {
+            constructor() {
+                this.x = Math.random() * width;  // 随机初始x坐标
+                this.y = Math.random() * height;  // 随机初始y坐标
+                this.size = Math.random() * 50 + 30;  // 随机大小
+                this.speedX = Math.random() * 2 - 1;  // 随机速度x
+                this.speedY = Math.random() * 2 - 1;  // 随机速度y
+                this.alpha = Math.random() * 0.5 + 0.5;  // 随机透明度
+            }
+
+            // 更新心形位置
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // 边界检测，碰到边界反弹
+                if (this.x < 0 || this.x > width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > height) this.speedY = -this.speedY;
+            }
+
+            // 绘制心形
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;  // 设置透明度
+                drawHeart(this.x, this.y, this.size);  // 绘制心形
+                ctx.restore();
+            }
+        }
+
+        // 初始化心形对象
+        function initHearts() {
+            for (let i = 0; i < 30; i++) {
+                hearts.push(new Heart());  // 创建30个心形
+            }
+        }
+
+        // 绘制文字批注
+        function drawText() {
+            ctx.font = "30px Arial"; // 设置字体大小
+            ctx.textAlign = "center";  // 文字居中对齐
+            ctx.fillStyle = "black";  // 文字颜色
+            ctx.fillText("唐梓钦和周思齐永远在一起", width / 2, 50);  // 在画布顶部居中显示文字
+        }
+
+        // 动画主循环
+        function animate() {
+            ctx.clearRect(0, 0, width, height);  // 清除画布
+
+            // 绘制所有心形
+            for (let i = 0; i < hearts.length; i++) {
+                hearts[i].update();  // 更新心形位置
+                hearts[i].draw();  // 绘制心形
+            }
+
+            drawText();  // 绘制文字批注
+
+            // 循环调用动画
+            requestAnimationFrame(animate);
+        }
+
+        // 启动
+        initHearts();
+        animate();
+    </script>
+</body>
+</html>
